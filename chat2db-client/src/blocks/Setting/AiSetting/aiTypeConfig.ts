@@ -62,12 +62,12 @@ const AIFormConfig: Record<AIType, IAiConfigBooleans> = {
   },
   [AIType.DEEPSEEK]: {
     apiKey: true,
-    apiHost: 'https://api.deepseek.com/v1/chat/completions',
+    apiHost: 'https://api.deepseek.com/v1/chat/completions/',
     model: 'deepseek-v4-flash',
   },
   [AIType.SILICONFLOW]: {
     apiKey: true,
-    apiHost: 'https://api.siliconflow.cn/v1/chat/completions',
+    apiHost: 'https://api.siliconflow.cn/v1/chat/completions/',
     model: 'deepseek-ai/DeepSeek-V4-Flash',
   },
 };
