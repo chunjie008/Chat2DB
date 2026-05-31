@@ -1,4 +1,4 @@
-# Build Windows Electron App + GitHub Release
+# Build Windows Electron App -> upload as artifact
 name: Build Windows
 
 on:
@@ -15,10 +15,12 @@ on:
 jobs:
   release:
     runs-on: windows-latest
+    permissions:
+      contents: read
 
     steps:
       - name: Check out git repository
-        uses: actions/checkout@main
+        uses: actions/checkout@v4
 
       - name: Extract version
         shell: bash
@@ -103,10 +105,13 @@ jobs:
           rm -r dist
 
       - name: Package Electron for Windows
-        uses: samuelmeuli/action-electron-builder@v1
+        run: |
+          cd chat2db-client
+          yarn run electron-builder --windows -c.extraMetadata.version=${{ env.VERSION }} --win --x64 -p never
+
+      - name: Upload exe as artifact
+        uses: actions/upload-artifact@v4
         with:
-          package_root: "chat2db-client/"
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          skip_build: true
-          args: "-c.extraMetadata.version=${{ env.VERSION }} --win --x64"
-          release: true
+          name: Chat2DB-Setup-${{ env.VERSION }}
+          path: chat2db-client/release/*Setup*.exe
+          retention-days: 7
