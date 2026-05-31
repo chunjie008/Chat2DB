@@ -6,6 +6,11 @@ on:
     tags:
       - v*
   workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version (e.g. 0.3.8)'
+        required: false
+        default: '0.0.0'
 
 jobs:
   release:
@@ -15,20 +20,20 @@ jobs:
       - name: Check out git repository
         uses: actions/checkout@main
 
-      - name: Extract version from tag
-        id: version
-        uses: bhowell2/github-substring-action@1.0.1
-        with:
-          value: ${{ github.ref }}
-          index_of_str: "refs/tags/v"
-
-      - name: Print version info
+      - name: Extract version
+        shell: bash
         run: |
-          echo "version: ${{ steps.version.outputs.substring }}"
+          if [ "${{ github.event_name }}" = "push" ]; then
+            VERSION="${{ github.ref_name }}"
+          else
+            VERSION="${{ inputs.version }}"
+          fi
+          VERSION="${VERSION#v}"
+          echo "VERSION=$VERSION" >> $GITHUB_ENV
+          echo "version: $VERSION"
 
-      # --- JRE for bundling ---
       - name: Install JRE 17
-        uses: actions/setup-java@main
+        uses: actions/setup-java@v4
         with:
           java-version: "17"
           distribution: "temurin"
@@ -42,14 +47,13 @@ jobs:
           $updatedContent = $content -replace '^(jdk.tls.disabledAlgorithms=)(.*)( TLSv1, TLSv1.1,)(.*)', '$1$2$4'
           $updatedContent | Set-Content $filePath
 
-      - name: Copy JRE into static
+      - name: Copy JRE
         run: |
           mkdir chat2db-client/static
           cp -r "${{ env.JAVA_HOME }}" chat2db-client/static/jre
 
-      # --- Node + Yarn ---
       - name: Install Node.js 16
-        uses: actions/setup-node@main
+        uses: actions/setup-node@v4
         with:
           node-version: 16
           cache: "yarn"
@@ -59,7 +63,7 @@ jobs:
         run: |
           cd chat2db-client
           yarn
-          yarn run build:web:prod --app_version=${{ steps.version.outputs.substring }}
+          yarn run build:web:prod --app_version=${{ env.VERSION }}
           cp -r dist ../chat2db-server/chat2db-server-start/src/main/resources/static/front
           cp -r dist/index.html ../chat2db-server/chat2db-server-start/src/main/resources/thymeleaf/
 
@@ -69,9 +73,8 @@ jobs:
           yarn
           yarn run build
 
-      # --- Java / Maven ---
       - name: Install Java & Maven
-        uses: actions/setup-java@main
+        uses: actions/setup-java@v4
         with:
           java-version: "17"
           distribution: "temurin"
@@ -80,33 +83,30 @@ jobs:
       - name: Build Java backend
         run: mvn clean package -B '-Dmaven.test.skip=true' -f chat2db-server/pom.xml
 
-      # --- Prepare versions dir ---
-      - name: Prepare versions directory
+      - name: Prepare versions
         run: |
           cd chat2db-client
           mkdir versions
-          mkdir versions/${{ steps.version.outputs.substring }}
-          mkdir versions/${{ steps.version.outputs.substring }}/static
-          echo -n ${{ steps.version.outputs.substring }} > version
+          mkdir versions/${{ env.VERSION }}
+          mkdir versions/${{ env.VERSION }}/static
+          echo -n ${{ env.VERSION }} > version
           cp -r version ./versions/
 
       - name: Copy backend JAR
-        run: |
-          cp chat2db-server/chat2db-server-start/target/chat2db-server-start.jar chat2db-client/versions/${{ steps.version.outputs.substring }}/static/
+        run: cp chat2db-server/chat2db-server-start/target/chat2db-server-start.jar chat2db-client/versions/${{ env.VERSION }}/static/
 
       - name: Build desktop frontend
         run: |
           cd chat2db-client
-          yarn run build:web:desktop --app_version=${{ steps.version.outputs.substring }}
-          cp -r dist ./versions/${{ steps.version.outputs.substring }}/
+          yarn run build:web:desktop --app_version=${{ env.VERSION }}
+          cp -r dist ./versions/${{ env.VERSION }}/
           rm -r dist
 
-      # --- Electron package ---
-      - name: Package Electron app for Windows
+      - name: Package Electron for Windows
         uses: samuelmeuli/action-electron-builder@v1
         with:
           package_root: "chat2db-client/"
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           skip_build: true
-          args: "-c.extraMetadata.version=${{ steps.version.outputs.substring }} --win --x64"
+          args: "-c.extraMetadata.version=${{ env.VERSION }} --win --x64"
           release: true
