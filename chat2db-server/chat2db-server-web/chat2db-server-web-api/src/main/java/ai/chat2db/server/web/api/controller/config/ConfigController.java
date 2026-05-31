@@ -15,8 +15,10 @@ import ai.chat2db.server.web.api.aspect.ConnectionInfoAspect;
 import ai.chat2db.server.web.api.controller.ai.azure.client.AzureOpenAIClient;
 import ai.chat2db.server.web.api.controller.ai.baichuan.client.BaichuanAIClient;
 import ai.chat2db.server.web.api.controller.ai.chat2db.client.Chat2dbAIClient;
+import ai.chat2db.server.web.api.controller.ai.deepseek.client.DeepSeekAIClient;
 import ai.chat2db.server.web.api.controller.ai.fastchat.client.FastChatAIClient;
 import ai.chat2db.server.web.api.controller.ai.rest.client.RestAIClient;
+import ai.chat2db.server.web.api.controller.ai.siliconflow.client.SiliconFlowAIClient;
 import ai.chat2db.server.web.api.controller.ai.tongyi.client.TongyiChatAIClient;
 import ai.chat2db.server.web.api.controller.ai.wenxin.client.WenxinAIClient;
 import ai.chat2db.server.web.api.controller.ai.zhipu.client.ZhipuChatAIClient;
@@ -102,6 +104,12 @@ public class ConfigController {
                 break;
             case ZHIPUAI:
                 saveZhipuChatAIConfig(request);
+                break;
+            case DEEPSEEK:
+                saveDeepSeekAIConfig(request);
+                break;
+            case SILICONFLOW:
+                saveSiliconFlowAIConfig(request);
                 break;
         }
         return ActionResult.isSuccess();
@@ -275,6 +283,38 @@ public class ConfigController {
         BaichuanAIClient.refresh();
     }
 
+    /**
+     * save deepseek ai config
+     */
+    private void saveDeepSeekAIConfig(AIConfigCreateRequest request) {
+        SystemConfigParam apikeyParam = SystemConfigParam.builder().code(DeepSeekAIClient.DEEPSEEK_API_KEY)
+                .content(request.getApiKey()).build();
+        configService.createOrUpdate(apikeyParam);
+        SystemConfigParam apiHostParam = SystemConfigParam.builder().code(DeepSeekAIClient.DEEPSEEK_HOST)
+                .content(request.getApiHost()).build();
+        configService.createOrUpdate(apiHostParam);
+        SystemConfigParam modelParam = SystemConfigParam.builder().code(DeepSeekAIClient.DEEPSEEK_MODEL)
+                .content(request.getModel()).build();
+        configService.createOrUpdate(modelParam);
+        DeepSeekAIClient.refresh();
+    }
+
+    /**
+     * save siliconflow ai config
+     */
+    private void saveSiliconFlowAIConfig(AIConfigCreateRequest request) {
+        SystemConfigParam apikeyParam = SystemConfigParam.builder().code(SiliconFlowAIClient.SILICONFLOW_API_KEY)
+                .content(request.getApiKey()).build();
+        configService.createOrUpdate(apikeyParam);
+        SystemConfigParam apiHostParam = SystemConfigParam.builder().code(SiliconFlowAIClient.SILICONFLOW_HOST)
+                .content(request.getApiHost()).build();
+        configService.createOrUpdate(apiHostParam);
+        SystemConfigParam modelParam = SystemConfigParam.builder().code(SiliconFlowAIClient.SILICONFLOW_MODEL)
+                .content(request.getModel()).build();
+        configService.createOrUpdate(modelParam);
+        SiliconFlowAIClient.refresh();
+    }
+
     @GetMapping("/system_config/{code}")
     public DataResult<Config> getSystemConfig(@PathVariable("code") String code) {
         DataResult<Config> result = configService.find(code);
@@ -379,6 +419,22 @@ public class ConfigController {
                 config.setApiKey(Objects.nonNull(zhipuApiKey.getData()) ? zhipuApiKey.getData().getContent() : "");
                 config.setApiHost(Objects.nonNull(zhipuApiHost.getData()) ? zhipuApiHost.getData().getContent() : "");
                 config.setModel(Objects.nonNull(zhipuModel.getData()) ? zhipuModel.getData().getContent() : "");
+                break;
+            case DEEPSEEK:
+                DataResult<Config> deepseekApiKey = configService.find(DeepSeekAIClient.DEEPSEEK_API_KEY);
+                DataResult<Config> deepseekApiHost = configService.find(DeepSeekAIClient.DEEPSEEK_HOST);
+                DataResult<Config> deepseekModel = configService.find(DeepSeekAIClient.DEEPSEEK_MODEL);
+                config.setApiKey(Objects.nonNull(deepseekApiKey.getData()) ? deepseekApiKey.getData().getContent() : "");
+                config.setApiHost(Objects.nonNull(deepseekApiHost.getData()) ? deepseekApiHost.getData().getContent() : "");
+                config.setModel(Objects.nonNull(deepseekModel.getData()) ? deepseekModel.getData().getContent() : "");
+                break;
+            case SILICONFLOW:
+                DataResult<Config> siliconflowApiKey = configService.find(SiliconFlowAIClient.SILICONFLOW_API_KEY);
+                DataResult<Config> siliconflowApiHost = configService.find(SiliconFlowAIClient.SILICONFLOW_HOST);
+                DataResult<Config> siliconflowModel = configService.find(SiliconFlowAIClient.SILICONFLOW_MODEL);
+                config.setApiKey(Objects.nonNull(siliconflowApiKey.getData()) ? siliconflowApiKey.getData().getContent() : "");
+                config.setApiHost(Objects.nonNull(siliconflowApiHost.getData()) ? siliconflowApiHost.getData().getContent() : "");
+                config.setModel(Objects.nonNull(siliconflowModel.getData()) ? siliconflowModel.getData().getContent() : "");
                 break;
             default:
                 break;

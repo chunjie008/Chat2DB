@@ -21,6 +21,8 @@ export default {
   'setting.tab.aiType.baichuan': '百川',
   'setting.tab.aiType.wenxin': '文心一言',
   'setting.tab.aiType.tongyiqianwen': '通義千問',
+  'setting.tab.aiType.deepseek': 'DeepSeek AI',
+  'setting.tab.aiType.siliconflow': 'SiliconFlow AI',
   'setting.tab.aiType.custom.tips': 'インターフェース形式はOpenAIのものと互換性があります',
   'setting.label.serviceAddress': 'サービスアドレス',
   'setting.button.apply': '適用',

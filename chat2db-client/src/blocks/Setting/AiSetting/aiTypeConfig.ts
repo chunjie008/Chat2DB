@@ -15,6 +15,8 @@ const AITypeName = {
   [AIType.OPENAI]: 'Open AI',
   [AIType.AZUREAI]: 'Azure AI',
   [AIType.RESTAI]: i18n('setting.tab.custom'),
+  [AIType.DEEPSEEK]: i18n('setting.tab.aiType.deepseek'),
+  [AIType.SILICONFLOW]: i18n('setting.tab.aiType.siliconflow'),
 };
 
 const AIFormConfig: Record<AIType, IAiConfigBooleans> = {
@@ -57,6 +59,16 @@ const AIFormConfig: Record<AIType, IAiConfigBooleans> = {
     apiKey: true,
     apiHost: true,
     model: true,
+  },
+  [AIType.DEEPSEEK]: {
+    apiKey: true,
+    apiHost: 'https://api.deepseek.com/v1/chat/completions',
+    model: 'deepseek-v4-flash',
+  },
+  [AIType.SILICONFLOW]: {
+    apiKey: true,
+    apiHost: 'https://api.siliconflow.cn/v1/chat/completions',
+    model: 'deepseek-ai/DeepSeek-V4-Flash',
   },
 };
 

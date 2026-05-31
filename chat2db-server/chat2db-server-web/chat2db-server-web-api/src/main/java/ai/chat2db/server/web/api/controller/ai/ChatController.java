@@ -23,6 +23,10 @@ import ai.chat2db.server.web.api.controller.ai.chat2db.client.Chat2dbAIClient;
 import ai.chat2db.server.web.api.controller.ai.chat2db.listener.Chat2dbAIEventSourceListener;
 import ai.chat2db.server.web.api.controller.ai.claude.client.ClaudeAIClient;
 import ai.chat2db.server.web.api.controller.ai.claude.listener.ClaudeAIEventSourceListener;
+import ai.chat2db.server.web.api.controller.ai.deepseek.client.DeepSeekAIClient;
+import ai.chat2db.server.web.api.controller.ai.deepseek.listener.DeepSeekAIEventSourceListener;
+import ai.chat2db.server.web.api.controller.ai.siliconflow.client.SiliconFlowAIClient;
+import ai.chat2db.server.web.api.controller.ai.siliconflow.listener.SiliconFlowAIEventSourceListener;
 import ai.chat2db.server.web.api.controller.ai.claude.model.ClaudeChatCompletionsOptions;
 import ai.chat2db.server.web.api.controller.ai.claude.model.ClaudeChatMessage;
 import ai.chat2db.server.web.api.controller.ai.config.LocalCache;
@@ -250,6 +254,10 @@ public class ChatController {
                 return chatWithTongyiChatAi(queryRequest, sseEmitter, uid);
             case ZHIPUAI:
                 return chatWithZhipuChatAi(queryRequest, sseEmitter, uid);
+            case DEEPSEEK:
+                return chatWithDeepSeekAi(queryRequest, sseEmitter, uid);
+            case SILICONFLOW:
+                return chatWithSiliconFlowAi(queryRequest, sseEmitter, uid);
         }
         return chatWithOpenAi(queryRequest, sseEmitter, uid);
     }
@@ -408,6 +416,48 @@ public class ChatController {
 
         ZhipuChatAIEventSourceListener sourceListener = new ZhipuChatAIEventSourceListener(sseEmitter);
         ZhipuChatAIClient.getInstance().streamCompletions(messages, sourceListener);
+        LocalCache.CACHE.put(uid, messages, LocalCache.TIMEOUT);
+        return sseEmitter;
+    }
+
+    /**
+     * chat with deepseek ai (OpenAI-compatible)
+     *
+     * @param queryRequest
+     * @param sseEmitter
+     * @param uid
+     * @return
+     * @throws IOException
+     */
+    private SseEmitter chatWithDeepSeekAi(ChatQueryRequest queryRequest, SseEmitter sseEmitter, String uid) throws IOException {
+        String prompt = buildPrompt(queryRequest);
+        List<FastChatMessage> messages = getFastChatMessage(uid, prompt);
+
+        buildSseEmitter(sseEmitter, uid);
+
+        DeepSeekAIEventSourceListener sourceListener = new DeepSeekAIEventSourceListener(sseEmitter);
+        DeepSeekAIClient.getInstance().streamCompletions(messages, sourceListener);
+        LocalCache.CACHE.put(uid, messages, LocalCache.TIMEOUT);
+        return sseEmitter;
+    }
+
+    /**
+     * chat with siliconflow ai (OpenAI-compatible)
+     *
+     * @param queryRequest
+     * @param sseEmitter
+     * @param uid
+     * @return
+     * @throws IOException
+     */
+    private SseEmitter chatWithSiliconFlowAi(ChatQueryRequest queryRequest, SseEmitter sseEmitter, String uid) throws IOException {
+        String prompt = buildPrompt(queryRequest);
+        List<FastChatMessage> messages = getFastChatMessage(uid, prompt);
+
+        buildSseEmitter(sseEmitter, uid);
+
+        SiliconFlowAIEventSourceListener sourceListener = new SiliconFlowAIEventSourceListener(sseEmitter);
+        SiliconFlowAIClient.getInstance().streamCompletions(messages, sourceListener);
         LocalCache.CACHE.put(uid, messages, LocalCache.TIMEOUT);
         return sseEmitter;
     }

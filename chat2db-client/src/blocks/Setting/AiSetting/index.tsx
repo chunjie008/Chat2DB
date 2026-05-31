@@ -19,9 +19,15 @@ function capitalizeFirstLetter(string) {
   return string.charAt(0).toUpperCase() + string.slice(1);
 }
 
+function maskKey(key: string) {
+  if (!key || key.length <= 8) return key;
+  return key.slice(0, 4) + '****' + key.slice(-4);
+}
+
 // openAI 的设置项
 export default function SettingAI(props: IProps) {
   const [aiConfig, setAiConfig] = useState<IAiConfig>();
+  const [focusedFields, setFocusedFields] = useState<Record<string, boolean>>({});
   const { userInfo } = useUserStore((state) => {
     return {
       userInfo: state.curUser,
@@ -92,6 +98,19 @@ export default function SettingAI(props: IProps) {
               label={capitalizeFirstLetter(key)}
               className={styles.title}
             >
+              {key === 'apiKey' || key === 'secretKey' ? (
+              <Input.Password
+                autoComplete="off"
+                value={focusedFields[key] ? aiConfig[key] : maskKey(aiConfig[key])}
+                placeholder={AIFormConfig[aiConfig?.aiSqlSource]?.[key]}
+                onFocus={() => setFocusedFields({ ...focusedFields, [key]: true })}
+                onBlur={() => setFocusedFields({ ...focusedFields, [key]: false })}
+                onChange={(e) => {
+                  setAiConfig({ ...aiConfig, [key]: e.target.value });
+                }}
+                iconRender={(visible) => (visible ? '👁️' : '👁️‍🗨️')}
+              />
+            ) : (
               <Input
                 autoComplete="off"
                 value={aiConfig[key]}
@@ -100,6 +119,7 @@ export default function SettingAI(props: IProps) {
                   setAiConfig({ ...aiConfig, [key]: e.target.value });
                 }}
               />
+            )}
             </Form.Item>
           ))}
         </Form>

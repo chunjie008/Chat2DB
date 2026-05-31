@@ -7,6 +7,8 @@ export enum AIType {
   OPENAI = 'OPENAI',
   AZUREAI = 'AZUREAI',
   RESTAI = 'RESTAI',
+  DEEPSEEK = 'DEEPSEEK',
+  SILICONFLOW = 'SILICONFLOW',
 }
 
 export interface IRemainingUse {

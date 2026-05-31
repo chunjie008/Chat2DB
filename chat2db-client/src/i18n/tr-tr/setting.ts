@@ -21,6 +21,8 @@ export default {
   'setting.tab.aiType.baichuan': 'BaiChuan AI',
   'setting.tab.aiType.wenxin': 'WenXin AI',
   'setting.tab.aiType.tongyiqianwen': 'TongYiQianWen AI',
+  'setting.tab.aiType.deepseek': 'DeepSeek AI',
+  'setting.tab.aiType.siliconflow': 'SiliconFlow AI',
   'setting.tab.aiType.custom.tips': 'API formatı OpenAI API formatıyla uyumludur',
   'setting.label.serviceAddress': 'Hizmet Adresi',
   'setting.button.apply': 'Uygula',
