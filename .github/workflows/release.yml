@@ -107,7 +107,7 @@ jobs:
       - name: Package Electron for Windows
         run: |
           cd chat2db-client
-          yarn run electron-builder --windows -c.extraMetadata.version=${{ env.VERSION }} --win --x64 -p never
+          yarn run electron-builder --windows --config.extraMetadata.version=${{ env.VERSION }} --win --x64 -p never
 
       - name: Upload exe as artifact
         uses: actions/upload-artifact@v4
