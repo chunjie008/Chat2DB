@@ -62,6 +62,16 @@ public enum AiSqlSourceEnum implements BaseEnum<String> {
      */
     FASTCHATAI("FAST CHAT AI"),
 
+    /**
+     * DEEPSEEK AI
+     */
+    DEEPSEEK("DEEPSEEK AI"),
+
+    /**
+     * SILICONFLOW AI
+     */
+    SILICONFLOW("SILICONFLOW AI"),
+
     ;
 
     final String description;
